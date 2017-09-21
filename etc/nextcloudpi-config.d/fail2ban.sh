@@ -32,6 +32,27 @@ install()
   apt-get install --no-install-recommends -y fail2ban 
   update-rc.d fail2ban disable
   rm -f /etc/fail2ban/jail.d/defaults-debian.conf
+
+  [[ "$DOCKERBUILD" == 1 ]] && {
+    cat > /etc/cont-init.d/50-fail2ban-run.sh <<EOF
+#!/bin/bash
+
+source /usr/local/etc/library.sh
+
+case "$1" in
+  stop)
+      echo "stopping fail2ban..."
+      fail2ban-client stop
+      exit 0
+    ;;
+esac
+
+persistent_cfgdir fail2ban
+
+exit 0
+EOF
+    chmod +x /etc/cont-init.d/50-fail2ban-run.sh
+  }
 }
 
 configure()
